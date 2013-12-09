@@ -1,1 +1,1 @@
-python -m doctest pychemy/*.py
+python -m doctest -v pychemy/*.py
