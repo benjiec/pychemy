@@ -737,6 +737,40 @@ class Spectrum(dict):
     def items(self):
         return ((key, self[key]) for key in self._sorted_keys)
 
+    def base_mass(self):
+        """
+        Returns base mass for the spectrum; base mass is the mass with highest fraction.
+
+        >>> Spectrum({1: [1.078, 0.9999], 2: [2.014, 0.0001]}).base_mass()
+        1.078
+        >>> round(Formula("C10H14N5O7P").high_resolution_spectrum(3).base_mass(),4)
+        347.0631
+        """
+        return max(self.values(), key=lambda t: t[1])[0]
+
+    def by_intensity_ratio(self, min_intensity_ratio):
+        """
+        Returns isotope masses from highest to lowest intensity ratio against
+        base mass, above a minimum intensity ratio threshold. Each returned
+        tuple is a mass and an intensity ratio.
+
+        >>> Spectrum({1: [1.078, 0.80], 2: [2.014, 0.20]}).by_intensity_ratio(0)
+        [(2.014, 0.25)]
+        >>> Spectrum({1: [1.078, 0.80], 2: [2.014, 0.20]}).by_intensity_ratio(0.5)
+        []
+        >>> r = Formula("C10H14N5O7P").high_resolution_spectrum(3).by_intensity_ratio(0.01)
+        >>> [(round(t[0],4),round(t[1],4)) for t in r]
+        [(348.0665, 0.1108), (348.0601, 0.0185), (349.0673, 0.0144)]
+        """
+
+        # sort by fraction
+        v = sorted(self.values(), key=lambda t: -t[1])
+        # base is first one in array with highest fraction
+        base_mass = v[0][0]
+        base_frac = v[0][1]
+        r = [(t[0],t[1]/base_frac) for t in v if t[0] != base_mass]
+        return [t for t in r if t[1] >= min_intensity_ratio]
+
     @lazyattr
     def range(self):
         """Return smallest and largest bin number."""
