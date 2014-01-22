@@ -35,6 +35,7 @@ Positive_Adducts = (
   ('2M+K',           2.00, 38.9632),
   ('2M+ACN+H',       2.00, 42.0338),
   ('2M+ACN+Na',      2.00, 64.0158),
+  ('M+H-H2O',        1.00, -17.0038),
 )
 
 Negative_Adducts = (
