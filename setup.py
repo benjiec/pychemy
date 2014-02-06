@@ -9,10 +9,4 @@ setup(name='pychemy',
       author_email='benjie@alum.mit.edu',
       packages=["pychemy"],
       package_dir={"": "."},
-      classifiers=[
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Topic :: Utilities'
-      ],
      )
-
