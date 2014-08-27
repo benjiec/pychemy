@@ -8,5 +8,5 @@ setup(name='pychemy',
       author='Mostly adopted from work of Christoph Gohlke, by Benjie Chen',
       author_email='benjie@alum.mit.edu',
       packages=["pychemy"],
-      package_dir={"": "."},
+      package_dir={"pychemy": "."},
      )
