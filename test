@@ -1,1 +1,2 @@
 python -m doctest -v pychemy/*.py
+python -m unittest discover -s pychemy -v
