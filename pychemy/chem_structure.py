@@ -170,7 +170,7 @@ class chem_graph():
             edgelist = edge_list
             )
      
-     nx.draw(self.G,
+    nx.draw(self.G,
             pos = pos_dict,
             labels = label_dict,
             with_labels = True,
