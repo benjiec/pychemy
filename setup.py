@@ -9,5 +9,5 @@ setup(name='pychemy',
       author_email='benjie@alum.mit.edu',
       packages=["pychemy"],
       package_dir={"pychemy": "."},
-      install_requires=['networkx'],
+      install_requires=['networkx', 'openbabel'],
      )
