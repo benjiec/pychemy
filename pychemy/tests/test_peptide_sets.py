@@ -191,3 +191,8 @@ class Peptide_Set_Testing(unittest.TestCase):
     self.run_balanced_sets()
     self.run_balanced_sets(max_set_size = 25)
     self.run_balanced_sets(unique = 2)
+
+
+
+if __name__ == '__main__':
+    unittest.main()
