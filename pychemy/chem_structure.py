@@ -1,16 +1,12 @@
 from elements import ELEMENTS
-from inchi import InChI
 import networkx as nx
-import re
 from collections import OrderedDict
 import openbabel 
 import matplotlib.pyplot as plt
-from collections import OrderedDict
 
 class chem_graph():
 
   def __init__(self, OBMol = None, graph = None, is_fragment = False, parent = None):
-    self.G = None
     G = None
     if OBMol:
       G = chem_graph.graph_from_OBMol(OBMol)      
@@ -41,6 +37,7 @@ class chem_graph():
           frag += chem_graph(graph=G2, is_fragment = True, parent = self.parent).gen_frag(num-1)
           for n in include:
             G.remove_node(n)
+          frag += chem_graph(graph=G, is_fragment = True, parent = self.parent).gen_frag(num-1)
       return frag
 
   def chem_formula(self):
@@ -57,7 +54,15 @@ class chem_graph():
     cf = ''
     for key in atoms:
        cf += key + ' ' + str(atoms[key]) + ' '
+    self.atoms = atoms
     return cf[:-1]
+
+  def mass(self):
+    cf = self.chem_formula()
+    m = 0
+    for key in self.atoms:
+      m += self.atoms[key] * ELEMENTS[key].exactmass
+    return m
 
   @staticmethod
   def graph_from_OBMol(mol):
@@ -94,8 +99,6 @@ class chem_graph():
       pos_dict[n] = [self.G.node[n]['X'], self.G.node[n]['Y']]
       label_dict[n] = self.G.node[n]['atom'].symbol
     
-    print "chem_graph.png: ", self.G.number_of_nodes(), len(pos_dict), len(label_dict)
-
     # Draw single bonds
     nx.draw(self.G,
             pos = pos_dict,
@@ -170,7 +173,7 @@ class chem_graph():
             edgelist = edge_list
             )
      
-     nx.draw(self.G,
+    nx.draw(self.G,
             pos = pos_dict,
             labels = label_dict,
             with_labels = True,
@@ -200,12 +203,13 @@ class chem_structure():
   def __init__(self, inchi = None):
     self.inchi = inchi
     self.mol = openbabel.OBMol()
-    obConversion = openbabel.OBConversion()
-    obConversion.SetInAndOutFormats("inchi", "mdl")
-    obConversion.ReadString(self.mol, inchi)
-    self.mol.AddHydrogens()
+    if inchi:
+      obConversion = openbabel.OBConversion()
+      obConversion.SetInAndOutFormats("inchi", "mdl")
+      obConversion.ReadString(self.mol, inchi)
+      self.mol.AddHydrogens()
  
-  def formula(self):
+  def chem_formula(self):
     return self.mol.GetSpacedFormula()
 
   def mass(self):
