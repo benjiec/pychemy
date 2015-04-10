@@ -1,7 +1,7 @@
 from elements import ELEMENTS
 import networkx as nx
 from collections import OrderedDict
-import openbabel 
+import openbabel
 import matplotlib.pyplot as plt
 
 class chem_graph():
@@ -9,10 +9,10 @@ class chem_graph():
   def __init__(self, OBMol = None, graph = None, is_fragment = False, parent = None):
     G = None
     if OBMol:
-      G = chem_graph.graph_from_OBMol(OBMol)      
+      G = chem_graph.graph_from_OBMol(OBMol)
     elif graph:
       G = nx.Graph(graph)
-    
+
     self.G = nx.Graph(G)
 
     if is_fragment:
@@ -38,7 +38,9 @@ class chem_graph():
           for n in include:
             G.remove_node(n)
           frag += chem_graph(graph=G, is_fragment = True, parent = self.parent).gen_frag(num-1)
-      return [f for f in frag if f]
+
+      # Keep only the non-empty fragments
+      return [f for f in frag if f.G.nodes()]
 
   def chem_formula(self):
     atoms = dict()
@@ -70,7 +72,7 @@ class chem_graph():
 
     # Generate 2d positions
     openbabel.OBOp.FindType("gen2d").Do(mol)
-    
+
     for atom in openbabel.OBMolAtomIter(mol):
       idx = atom.GetIdx()
 
@@ -85,10 +87,10 @@ class chem_graph():
       atom1 = bond.GetBeginAtom().GetIdx()
       atom2 = bond.GetEndAtom().GetIdx()
       G.add_edge(atom1, atom2)
-      G[atom1][atom2]['order'] = bond.GetBO()  
-  
+      G[atom1][atom2]['order'] = bond.GetBO()
+
     return G
-  
+
   def draw(self, node_color = (1,1,1), edge_color = [0,0,0], node_size = 700, font_color = [0,0,0]):
     node_colors = [node_color for i in range(self.G.number_of_nodes())]
     edge_colors = [edge_color for i in range(self.G.number_of_edges())]
@@ -98,7 +100,7 @@ class chem_graph():
     for n in self.G.nodes():
       pos_dict[n] = [self.G.node[n]['X'], self.G.node[n]['Y']]
       label_dict[n] = self.G.node[n]['atom'].symbol
-    
+
     # Draw single bonds
     nx.draw(self.G,
             pos = pos_dict,
@@ -142,7 +144,7 @@ class chem_graph():
             width = [2 for i in widths],
             edgelist = edge_list
             )
-    
+
     # Draw triple bonds
     edge_list = [edge for edge in self.G.edges() if self.G[edge[0]][edge[1]]['order'] == 3]
     nx.draw(self.G,
@@ -172,7 +174,7 @@ class chem_graph():
             width = [6 for i in widths],
             edgelist = edge_list
             )
-     
+
     nx.draw(self.G,
             pos = pos_dict,
             labels = label_dict,
@@ -191,7 +193,7 @@ class chem_graph():
     if self.parent:
       w = 0.95
       self.parent.draw(edge_color = [w,w,w],
-                font_color = [w,w,w], 
+                font_color = [w,w,w],
                 node_size = 600,
                 )
     self.draw()
@@ -208,7 +210,7 @@ class chem_structure():
       obConversion.SetInAndOutFormats("inchi", "mdl")
       obConversion.ReadString(self.mol, inchi)
       self.mol.AddHydrogens()
- 
+
   def chem_formula(self):
     return self.mol.GetSpacedFormula()
 
@@ -222,4 +224,4 @@ class chem_structure():
       nodes = tuple(sorted([n for n in item.G.nodes()]))
       if nodes not in u.keys():
         u[nodes] = item
-    return [u[key] for key in u]  
+    return [u[key] for key in u]
