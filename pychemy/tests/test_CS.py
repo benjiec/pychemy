@@ -9,11 +9,11 @@ inchi1 = 'InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)/f/
 #Aspirine
 inchi2 = 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)'
 
-class chem_structure_Testing(unittest.TestCase):   
+class chem_structure_Testing(unittest.TestCase):
 
 
 ###############################
-# chem_structure  
+# chem_structure
 
   def test_chem_structure_without_input(self):
     CS = cs()
@@ -33,7 +33,7 @@ class chem_structure_Testing(unittest.TestCase):
     G = cg.graph_from_OBMol(CS.mol)
 
     self.assertEqual(G.number_of_nodes(), 16)
-    
+
     self.assertEqual(G.node[1]['atom'], ELEMENTS['C'])
     self.assertEqual(G.node[2]['atom'], ELEMENTS['C'])
     self.assertEqual(G.node[3]['atom'], ELEMENTS['C'])
@@ -75,8 +75,8 @@ class chem_structure_Testing(unittest.TestCase):
                 (3,9),(9,3),
                 (8,15),(15,8),
                 (6,13),(13,6),
-                (6,14),(14,6)] 
-    
+                (6,14),(14,6)]
+
     for e in G.edges():
       self.assertIn(e,edge_set)
       edge_set.remove(e)
@@ -97,7 +97,7 @@ class chem_structure_Testing(unittest.TestCase):
   def test_chem_formula(self):
     CS = cs(inchi = inchi1)
     CG = cg(CS.mol)
-    self.assertEqual(CG.chem_formula(),CS.chem_formula()) 
+    self.assertEqual(CG.chem_formula(),CS.chem_formula())
 
   def test_mass(self):
     CS = cs(inchi = inchi1)
@@ -107,7 +107,7 @@ class chem_structure_Testing(unittest.TestCase):
   def test_gen_frag_with_no_additional_steps(self):
     CS = cs(inchi = inchi1)
     CG = cg(CS.mol)
-    self.assertEqual(CG.gen_frag(0), [CG])   
+    self.assertEqual(CG.gen_frag(0), [CG])
 
   def test_gen_frag_with_additional_steps_uniqueness(self):
     CS = cs(inchi = inchi1)
