@@ -38,7 +38,7 @@ class chem_graph():
           for n in include:
             G.remove_node(n)
           frag += chem_graph(graph=G, is_fragment = True, parent = self.parent).gen_frag(num-1)
-      return frag
+      return [f for f in frag if f]
 
   def chem_formula(self):
     atoms = dict()
