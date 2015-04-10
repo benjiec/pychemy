@@ -6,14 +6,14 @@ from pychemy.elements import ELEMENTS
 
 inchi1 = 'InChI=1/C5H5N5O/c6-5-9-3-2(4(11)10-5)7-1-8-3/h1H,(H4,6,7,8,9,10,11)/f/h8,10H,6H2'
 
-#Aspirine
+# Aspirine
 inchi2 = 'InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)'
 
 class chem_structure_Testing(unittest.TestCase):
 
 
-###############################
-# chem_structure
+  ###############################
+  # chem_structure
 
   def test_chem_structure_without_input(self):
     CS = cs()
@@ -25,8 +25,8 @@ class chem_structure_Testing(unittest.TestCase):
     self.assertEqual(CS.mol.NumAtoms(), 16)
     self.assertEqual(CS.mol.NumBonds(), 17)
 
-###############################
-# chem_graph
+  ###############################
+  # chem_graph
 
   def test_graph_from_OBMol(self):
     CS = cs(inchi = inchi1)
@@ -59,23 +59,23 @@ class chem_structure_Testing(unittest.TestCase):
       self.assertTrue('order' in G[e[0]][e[1]])
 
     self.assertEqual(G.number_of_edges(), 17)
-    edge_set = [(1,12),(12,1),
-                (1,7),(7,1),
-                (1,8),(8,1),
-                (2,7),(7,2),
-                (3,8),(8,3),
-                (2,3),(3,2),
-                (2,4),(4,2),
-                (4,11),(11,4),
-                (4,10),(10,4),
-                (10,16),(16,10),
-                (5,10),(10,5),
-                (5,6),(6,5),
-                (5,9),(9,5),
-                (3,9),(9,3),
-                (8,15),(15,8),
-                (6,13),(13,6),
-                (6,14),(14,6)]
+    edge_set = [(1, 12), (12,  1),
+                (1,  7),  (7,  1),
+                (1,  8),  (8,  1),
+                (2,  7),  (7,  2),
+                (3,  8),  (8,  3),
+                (2,  3),  (3,  2),
+                (2,  4),  (4,  2),
+                (4, 11), (11,  4),
+                (4, 10), (10,  4),
+               (10, 16), (16, 10),
+                (5, 10), (10,  5),
+                (5,  6),  (6,  5),
+                (5,  9),  (9,  5),
+                (3,  9),  (9,  3),
+                (8, 15), (15,  8),
+                (6, 13), (13,  6),
+                (6, 14), (14,  6)]
 
     for e in G.edges():
       self.assertIn(e,edge_set)
