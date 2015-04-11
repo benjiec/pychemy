@@ -109,9 +109,18 @@ class chem_structure_Testing(unittest.TestCase):
     CG = cg(CS.mol)
     self.assertEqual(CG.gen_frag(0), [CG])
 
+  def test_gen_frag_has_no_empty_molecules(self):
+    CS = cs(inchi = inchi1)
+    CG = cg(CS.mol)
+    for level in xrange(0, 4):
+      frag = CG.gen_frag(level)
+      nonempty_frag = filter(lambda f: len(f.chem_formula()) > 0, frag)
+      self.assertEqual(frag, nonempty_frag)
+
+
   def test_gen_frag_with_additional_steps_uniqueness(self):
     CS = cs(inchi = inchi1)
     CG = cg(CS.mol)
-    for level in range(1,4):
+    for level in range(1, 4):
       frag = CG.gen_frag(level)
       self.assertEqual(len(frag), len(set(frag)))
