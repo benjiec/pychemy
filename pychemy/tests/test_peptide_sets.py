@@ -194,9 +194,7 @@ class Peptide_Set_Testing(unittest.TestCase):
     self.run_balanced_sets(max_set_size = 25)
     self.run_balanced_sets(unique = 2)
 
-
 ###############################
-  
 
   def test_calc_props_with_empty_sequence(self):
     self.assertTrue(np.array_equal(calc_props(''), np.array([])))
@@ -252,7 +250,7 @@ class Peptide_Set_Testing(unittest.TestCase):
     self.assertAlmostEqual(test[1]['svm_score'],0.698591590494)
 
     self.assertEqual(test[2]['seq'], 'VEVNEK')
-    self.assertAlmostEqual(test[2]['prob'],0.698591590494)
+    self.assertAlmostEqual(test[2]['prob'],0.874711212861)
     self.assertAlmostEqual(test[2]['svm_score'],0.310199536208)
 
 ###############################

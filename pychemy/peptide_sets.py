@@ -147,25 +147,25 @@ zimmerman_bulkiness = {'A': 11.500,'C': 13.460,'D': 11.680,'E': 13.570,'F': 19.8
 # output:
 #        numpy.array feature vector containing 35 properties of amino acid sequence 
 def calc_props(seq = ''):
-"""
-FEATURE VECTOR
-1   Length
-2   Molecular weight
-3   Number of non-polar hydrophobic residues
-4   Number of polar hydrophilic residues
-5   Number of uncharged polar hydrophilic residues
-6   Number of charged polar hydrophilic residues
-7   Number of positively charged polar hydrophilic residues
-8   Number of negatively charged polar hydrophilic residues
-9   Hydrophobicity—Eisenberg scale (Eisenberg et al., 1984)
-10  Hydrophilicity—Hopp–Woods scale (Hopp and Woods, 1981)
-11  Hydrophobicity—Kyte–Doolittle (Kyte and Doolittle, 1982)
-12  Hydropathicity—Roseman scale (Roseman, 1988)
-13  Polarity—Grantham scale (Grantham, 1974)
-14  Polarity—Zimmerman scale (Zimmerman et al., 1968)
-15  Bulkiness (Zimmerman et al., 1968)
-16–35   Amino acid singlet counts in order: ACDEFGHIKLMNPQRSTVWY
-"""
+  """
+  FEATURE VECTOR
+  1   Length
+  2   Molecular weight
+  3   Number of non-polar hydrophobic residues
+  4   Number of polar hydrophilic residues
+  5   Number of uncharged polar hydrophilic residues
+  6   Number of charged polar hydrophilic residues
+  7   Number of positively charged polar hydrophilic residues
+  8   Number of negatively charged polar hydrophilic residues
+  9   Hydrophobicity-Eisenberg scale (Eisenberg et al., 1984)
+  10  Hydrophilicity-Hopp-Woods scale (Hopp and Woods, 1981)
+  11  Hydrophobicity-Kyte-Doolittle (Kyte and Doolittle, 1982)
+  12  Hydropathicity-Roseman scale (Roseman, 1988)
+  13  Polarity-Grantham scale (Grantham, 1974)
+  14  Polarity-Zimmerman scale (Zimmerman et al., 1968)
+  15  Bulkiness (Zimmerman et al., 1968)
+  16-35   Amino acid singlet counts in order: ACDEFGHIKLMNPQRSTVWY
+  """
 
   if seq:
     props = [ float(len(seq)),
