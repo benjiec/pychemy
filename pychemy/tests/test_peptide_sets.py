@@ -213,7 +213,7 @@ class Peptide_Set_Testing(unittest.TestCase):
     test = calc_props('SAMPLEPEPTIDE')
 
     for idx, item in enumerate(correct):
-      self.assertTrue(test[idx] - item < 0.001)
+      self.assertAlmostEqual(test[idx], item, places=3)
 
 ###############################
 
@@ -229,8 +229,8 @@ class Peptide_Set_Testing(unittest.TestCase):
 ###############################
 
   def test_calc_ionization_prob(self):
-    self.assertAlmostEqual(calc_ionization_prob(0.209218277881),0.798247804562)
-    self.assertAlmostEqual(calc_ionization_prob(1.6285437521),1.00000003356)
+    self.assertAlmostEqual(calc_ionization_prob(0.209218277881), 0.798247804562)
+    self.assertAlmostEqual(calc_ionization_prob(1.6285437521), 1.00000003356)
 
 ###############################
 
@@ -238,7 +238,7 @@ class Peptide_Set_Testing(unittest.TestCase):
     self.assertEqual([], calc_ionization_probs([]))
 
   def test_calc_ionization_probs_with_non_empty_list(self):
-    test = calc_ionization_probs(['MASQASEK','DISLVQTPHK','VEVNEK'])
+    test = calc_ionization_probs(['MASQASEK', 'DISLVQTPHK', 'VEVNEK'])
 
     self.assertEqual(len(test), 3)
     self.assertEqual(test[0]['seq'], 'MASQASEK')
@@ -246,8 +246,8 @@ class Peptide_Set_Testing(unittest.TestCase):
     self.assertAlmostEqual(test[0]['svm_score'], 0.209218277881)
 
     self.assertEqual(test[1]['seq'], 'DISLVQTPHK')
-    self.assertAlmostEqual(test[1]['prob'],0.985826563481)
-    self.assertAlmostEqual(test[1]['svm_score'],0.698591590494)
+    self.assertAlmostEqual(test[1]['prob'], 0.985826563481)
+    self.assertAlmostEqual(test[1]['svm_score'], 0.698591590494)
 
     self.assertEqual(test[2]['seq'], 'VEVNEK')
     self.assertAlmostEqual(test[2]['prob'],0.874711212861)
