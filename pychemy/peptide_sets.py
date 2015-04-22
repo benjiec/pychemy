@@ -106,8 +106,10 @@ def balanced_sets(proteins, max_set_size = 10, unique = 1):
      sets.append([p])
   return sets
 
+##################################################################################
+# Calculate ionizability of peptides based on the method used by STEPP from PNNL #
+##################################################################################
 
-# Calculate ionizability of peptides based on the method used by STEPP from PNNL
 from pychemy.peptides import mass_from_sequence
 import numpy as np
 import csv
@@ -139,7 +141,32 @@ grantham_polarity = {'A':  8.100,'C':  5.500,'D': 13.000,'E': 12.300,'F':  5.200
 zimmerman_polarity = {'A':  0.000,'C':  1.480,'D': 49.700,'E': 49.900,'F':  0.350,'G':  0.000,'H': 51.600,'I':  0.130,'K': 49.500,'L':  0.130,'M':  1.430,'N':  3.380,'P':  1.580,'Q':  3.530,'R': 52.000,'S':  1.670,'T':  1.660,'V':  0.130,'W':  2.100,'Y':  1.610 }          
 zimmerman_bulkiness = {'A': 11.500,'C': 13.460,'D': 11.680,'E': 13.570,'F': 19.800,'G':  3.400,'H': 13.690,'I': 21.400,'K': 15.710,'L': 21.400,'M': 16.250,'N': 12.820,'P': 17.430,'Q': 14.450,'R': 14.280,'V': 21.570,'S':  9.470,'T': 15.770,'W': 21.670,'Y': 18.030 }
 
+# Creates feature vector containing properties used in SVM model
+# inputs:
+#        seq:   string containing amino acid sequence  
+# output:
+#        numpy.array feature vector containing 35 properties of amino acid sequence 
 def calc_props(seq = ''):
+"""
+FEATURE VECTOR
+1   Length
+2   Molecular weight
+3   Number of non-polar hydrophobic residues
+4   Number of polar hydrophilic residues
+5   Number of uncharged polar hydrophilic residues
+6   Number of charged polar hydrophilic residues
+7   Number of positively charged polar hydrophilic residues
+8   Number of negatively charged polar hydrophilic residues
+9   Hydrophobicity—Eisenberg scale (Eisenberg et al., 1984)
+10  Hydrophilicity—Hopp–Woods scale (Hopp and Woods, 1981)
+11  Hydrophobicity—Kyte–Doolittle (Kyte and Doolittle, 1982)
+12  Hydropathicity—Roseman scale (Roseman, 1988)
+13  Polarity—Grantham scale (Grantham, 1974)
+14  Polarity—Zimmerman scale (Zimmerman et al., 1968)
+15  Bulkiness (Zimmerman et al., 1968)
+16–35   Amino acid singlet counts in order: ACDEFGHIKLMNPQRSTVWY
+"""
+
   if seq:
     props = [ float(len(seq)),
             mass_from_sequence(seq),
@@ -161,7 +188,12 @@ def calc_props(seq = ''):
   else:
     return np.array([])
 
-def calc_SVM_score(fv):
+# Calculates SVM score of a feature vector 
+# inputs:
+#        fv = numpy.array feature vector containing 35 properties of amino acid sequence 
+# output:
+#        SVM score 
+def calc_SVM_score(fv = np.array([])):
   if len(fv) == NUM_FEATURES:
     with open("resources/STEPP/STEPP_SupportVectors.txt") as tsv:
       sv_idx = 0
@@ -185,7 +217,12 @@ def calc_SVM_score(fv):
   else:
     return None
   
-def calc_ionization_prob(val):
+# Calculates ionization probability based on SVM score 
+# inputs:
+#        score = SVM score output of calc_svm_score()
+# output:
+#        ionization probability
+def calc_ionization_prob(score = 0):
   zeta_pos = -0.3821 # K_pos
   sigma_pos = 0.3831 # scale_pos 
   mu_pos = 0.0739 # location_pos
@@ -213,8 +250,8 @@ def calc_ionization_prob(val):
     else:
       return 1 - val
     
-  pos_prob = positive_probability(val, mu_pos, sigma_pos, zeta_pos)
-  neg_prob = negative_probability(val, mu_neg, sigma_neg, zeta_neg)
+  pos_prob = positive_probability(score, mu_pos, sigma_pos, zeta_pos)
+  neg_prob = negative_probability(score, mu_neg, sigma_neg, zeta_neg)
 
   divisor = pos_prob + neg_prob
 
@@ -222,6 +259,11 @@ def calc_ionization_prob(val):
 
   return prob if prob > 0 else 0
 
+# Calculates ionization probability and SVM score for all peptides in a set
+# inputs:
+#        peptides = array of peptide sequence strings ['SAMPLE', 'SAMPLE',...]
+# output:
+#        array of dictionaries [{'seq': string, 'prob': float, 'svm_score': float}, ...] 
 def calc_ionization_probs(peptides = []):
   
   # Normalize vector based on baseline mean and stdev
