@@ -106,3 +106,136 @@ def balanced_sets(proteins, max_set_size = 10, unique = 1):
      sets.append([p])
   return sets
 
+
+# Calculate ionizability of peptides based on the method used by STEPP from PNNL
+from pychemy.peptides import mass_from_sequence
+import numpy as np
+import csv
+
+NUM_FEATURES = 35
+
+AA_order = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+
+with open("resources/STEPP/STEPP_NormFactor_mean.txt") as tsv:
+  STEPP_mean = np.array([float(line[0]) for line in csv.reader(tsv, delimiter="\t")])
+
+with open("resources/STEPP/STEPP_NormFactor_std.txt") as tsv:
+    STEPP_std = np.array([float(line[0]) for line in csv.reader(tsv, delimiter="\t")])
+        
+with open("resources/STEPP/STEPP_Weights.txt") as tsv:
+  STEPP_weights = np.array([float(line[0]) for line in csv.reader(tsv, delimiter="\t")])   
+  
+non_polar_hydrophobic = ['A','F','G','I','L','M','P','V','W','Y']
+polar_hydrophillic = ['C','D','E','H','K','N','Q','R','S','T']
+uncharged_polar_hydrophillic = ['C','N','Q','S','T']
+charged_polar_hydrophillic = ['D','E','H','K','R']
+postive_polar_hydrophillic = ['R','H','K']
+negative_polar_hydrophillic = ['D','E']
+eisenberg_hydrophobicity = {'A':  0.620,'C':  0.290,'D': -0.900,'E': -0.740,'F':  1.190,'G':  0.480,'H': -0.400,'I':  1.380,'K': -1.500,'L':  1.060,'M':  0.640,'N': -0.780,'P':  0.120,'Q': -0.850,'R': -2.530,'S': -0.180,'T': -0.050,'V':  1.080,'W':  0.810,'Y':  0.260 }
+hopp_woods_hydrophobicity = {'A': -0.500,'C': -1.000,'D':  3.000,'E':  3.000,'F': -2.500,'G':  0.000,'H': -0.500,'I': -1.800,'K':  3.000,'L': -1.800,'M': -1.300,'N':  0.200,'P':  0.000,'Q':  0.200,'R':  3.000,'S':  0.300,'T': -0.400,'V': -1.500,'W': -3.400,'Y': -2.300 }
+kyte_doolittle_hydrophobicity = {'A':  1.800,'C':  2.500,'D': -3.500,'E': -3.500,'F':  2.800,'G': -0.400,'H': -3.200,'I':  4.500,'K': -3.900,'L':  3.800,'M':  1.900,'N': -3.500,'P': -1.600,'Q': -3.500,'R': -4.500,'S': -0.800,'T': -0.700,'V':  4.200,'W': -0.900,'Y': -1.300 }
+roseman_hydropathicity = {'A':  0.390,'C':  0.250,'D': -3.810,'E': -2.910,'F':  2.270,'G':  0.000,'H': -0.640,'I':  1.820,'K': -2.770,'L':  1.820,'M':  0.960,'N': -1.910,'P':  0.990,'Q': -1.300,'R': -3.950,'S': -1.240,'T': -1.000,'V':  1.300,'W':  2.130,'Y':  1.470 }
+grantham_polarity = {'A':  8.100,'C':  5.500,'D': 13.000,'E': 12.300,'F':  5.200,'G':  9.000,'H': 10.400,'I':  5.200,'K': 11.300,'L':  4.900,'M':  5.700,'N': 11.600,'P':  8.000,'Q': 10.500,'R': 10.500,'S':  9.200,'T':  8.600,'V':  5.900,'W':  5.400,'Y':  6.200 }
+zimmerman_polarity = {'A':  0.000,'C':  1.480,'D': 49.700,'E': 49.900,'F':  0.350,'G':  0.000,'H': 51.600,'I':  0.130,'K': 49.500,'L':  0.130,'M':  1.430,'N':  3.380,'P':  1.580,'Q':  3.530,'R': 52.000,'S':  1.670,'T':  1.660,'V':  0.130,'W':  2.100,'Y':  1.610 }          
+zimmerman_bulkiness = {'A': 11.500,'C': 13.460,'D': 11.680,'E': 13.570,'F': 19.800,'G':  3.400,'H': 13.690,'I': 21.400,'K': 15.710,'L': 21.400,'M': 16.250,'N': 12.820,'P': 17.430,'Q': 14.450,'R': 14.280,'V': 21.570,'S':  9.470,'T': 15.770,'W': 21.670,'Y': 18.030 }
+
+def calc_props(seq = ''):
+  if seq:
+    props = [ float(len(seq)),
+            mass_from_sequence(seq),
+            sum([1.0 for aa in seq if aa in non_polar_hydrophobic]),
+            sum([1.0 for aa in seq if aa in polar_hydrophillic]),
+            sum([1.0 for aa in seq if aa in uncharged_polar_hydrophillic]),
+            sum([1.0 for aa in seq if aa in charged_polar_hydrophillic]),
+            sum([1.0 for aa in seq if aa in postive_polar_hydrophillic]),
+            sum([1.0 for aa in seq if aa in negative_polar_hydrophillic]),
+            float(sum(map(lambda x: eisenberg_hydrophobicity[x], seq)))/float(len(seq)),
+            float(sum(map(lambda x: hopp_woods_hydrophobicity[x], seq)))/float(len(seq)),
+            float(sum(map(lambda x: kyte_doolittle_hydrophobicity[x], seq)))/float(len(seq)),
+            float(sum(map(lambda x: roseman_hydropathicity[x], seq)))/float(len(seq)),
+            float(sum(map(lambda x: grantham_polarity[x], seq)))/float(len(seq)),
+            float(sum(map(lambda x: zimmerman_polarity[x], seq)))/float(len(seq)),
+            float(sum(map(lambda x: zimmerman_bulkiness[x], seq)))/float(len(seq))
+            ] + [sum([1 for aa in seq if aa == AA]) for AA in AA_order]
+    return np.array(props)
+  else:
+    return np.array([])
+
+def calc_SVM_score(fv):
+  if len(fv) == NUM_FEATURES:
+    with open("resources/STEPP/STEPP_SupportVectors.txt") as tsv:
+      sv_idx = 0
+      svm_score = 0
+      for line in csv.reader(tsv, delimiter="\t"):
+        sv = np.array([float(i) for i in line])
+        kxy = np.dot(fv, sv)
+        kxx = np.dot(fv,fv)
+        kyy = np.dot(sv,sv)
+             
+        kxy /= np.sqrt(kxx * kyy)
+        kxy += 10
+        kxy = kxy ** 2
+        
+        kxy *= STEPP_weights[sv_idx]
+        
+        svm_score += kxy
+        sv_idx += 1
+         
+      return svm_score
+  else:
+    return None
+  
+def calc_ionization_prob(val):
+  zeta_pos = -0.3821 # K_pos
+  sigma_pos = 0.3831 # scale_pos 
+  mu_pos = 0.0739 # location_pos
+
+  zeta_neg = -0.1945 # K_neg
+  sigma_neg = 0.3860 # scale_neg
+  mu_neg  = -0.4283 # location_neg
+
+  def GEVCDF(x, mu, sigma, zeta):
+    z = (x-mu)/sigma
+    t = np.real((1 + z * zeta + 0j) ** (-1/zeta))
+    return np.exp(-t)
+  
+  def positive_probability(x, mu, sigma, zeta):
+    val = GEVCDF(x, mu, sigma, zeta)
+    if np.isnan(val) or np.isinf(val):
+      return 1
+    else:
+      return val
+      
+  def negative_probability(x, mu, sigma, zeta):
+    val = GEVCDF(x, mu, sigma, zeta)
+    if np.isnan(val) or np.isinf(val):
+      return 1
+    else:
+      return 1 - val
+    
+  pos_prob = positive_probability(val, mu_pos, sigma_pos, zeta_pos)
+  neg_prob = negative_probability(val, mu_neg, sigma_neg, zeta_neg)
+
+  divisor = pos_prob + neg_prob
+
+  prob = pos_prob / divisor
+
+  return prob if prob > 0 else 0
+
+def calc_ionization_probs(peptides = []):
+  
+  # Normalize vector based on baseline mean and stdev
+  norm_props = [np.divide(calc_props(p) - STEPP_mean, STEPP_std) for p in peptides]
+  out = []
+
+  for idx, norm_prop in enumerate(norm_props):
+    svm_score = calc_SVM_score(norm_prop)
+    if svm_score:
+      out += [{'seq': peptides[idx], 'prob': calc_ionization_prob(svm_score), 'svm_score': svm_score}]
+    else:
+      out += [{'seq': peptides[idx], 'prob': 0, 'svm_score': None}]
+    
+  return out
+
+
+    

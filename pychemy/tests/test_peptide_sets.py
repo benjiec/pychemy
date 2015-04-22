@@ -1,6 +1,8 @@
 import unittest, tempfile, os
-from peptide_sets import *
+from pychemy.peptide_sets import *
 import random
+
+import numpy as np
 
 AA_dict = {1:'A', 2:'C', 3:'D', 4:'E', 5:'F', 6:'G', 7:'H', 8:'I', 9:'L', 10:'K',
            11:'M', 12:'N', 13:'P', 14:'Q', 15:'R', 16:'S', 17:'T', 18:'V', 19:'W', 20:'Y'}
@@ -176,7 +178,7 @@ class Peptide_Set_Testing(unittest.TestCase):
   def test_balanced_sets_with_single_protein(self):
     self.assertEqual(balanced_sets(['AAR']), [['AAR']])
 
-  def run_balanced_sets(self, num_iter = 100, prot_length = 100, num_prot = 100, max_set_size = 10, unique = 5):
+  def run_balanced_sets(self, num_iter = 1, prot_length = 100, num_prot = 100, max_set_size = 10, unique = 5):
     for i in range(num_iter):   
       test_proteins = [gen_protein(prot_length) for j in range(num_prot)]
       prot_count = 0
@@ -192,6 +194,68 @@ class Peptide_Set_Testing(unittest.TestCase):
     self.run_balanced_sets(max_set_size = 25)
     self.run_balanced_sets(unique = 2)
 
+
+###############################
+  
+
+  def test_calc_props_with_empty_sequence(self):
+    self.assertTrue(np.array_equal(calc_props(''), np.array([])))
+
+  def test_calc_props_with_nonempty_sequence(self):
+    correct = np.array(
+    [ 1.30000000e+01,   1.42764901e+03,   7.00000000e+00,   6.00000000e+00,
+      2.00000000e+00,   4.00000000e+00,   0.00000000e+00,   4.00000000e+00,
+      5.46153846e-02,   5.00000000e-01,  -6.38461538e-01,  -5.24615385e-01,
+      8.89230769e+00,   1.60892308e+01,   1.54207692e+01,   1.00000000e+00,
+      0.00000000e+00,   1.00000000e+00,   3.00000000e+00,   0.00000000e+00,
+      0.00000000e+00,   0.00000000e+00,   1.00000000e+00,   0.00000000e+00,
+      1.00000000e+00,   1.00000000e+00,   0.00000000e+00,   3.00000000e+00,
+      0.00000000e+00,   0.00000000e+00,   1.00000000e+00,   1.00000000e+00,
+      0.00000000e+00,   0.00000000e+00,   0.00000000e+00])
+    test = calc_props('SAMPLEPEPTIDE')
+
+    for idx, item in enumerate(correct):
+      self.assertTrue(test[idx] - item < 0.001)
+
+###############################
+
+  def test_calc_SVM_score_without_complete_feature_vector(self):
+    self.assertIsNone(calc_SVM_score([]))
+    self.assertIsNone(calc_SVM_score([1]))
+    self.assertIsNone(calc_SVM_score([1,2,3]))
+
+  def test_calc_SVM_score_with_complete_feature_vector(self):
+    test = calc_SVM_score(np.divide(calc_props('SAMPLEPEPTIDE') - STEPP_mean, STEPP_std))
+    self.assertAlmostEqual(test, 1.6285437521)
+
+###############################
+
+  def test_calc_ionization_prob(self):
+    self.assertAlmostEqual(calc_ionization_prob(0.209218277881),0.798247804562)
+    self.assertAlmostEqual(calc_ionization_prob(1.6285437521),1.00000003356)
+
+###############################
+
+  def test_calc_ionization_probs_with_empty_list(self):
+    self.assertEqual([], calc_ionization_probs([]))
+
+  def test_calc_ionization_probs_with_non_empty_list(self):
+    test = calc_ionization_probs(['MASQASEK','DISLVQTPHK','VEVNEK'])
+
+    self.assertEqual(len(test), 3)
+    self.assertEqual(test[0]['seq'], 'MASQASEK')
+    self.assertAlmostEqual(test[0]['prob'], 0.798247804562)
+    self.assertAlmostEqual(test[0]['svm_score'], 0.209218277881)
+
+    self.assertEqual(test[1]['seq'], 'DISLVQTPHK')
+    self.assertAlmostEqual(test[1]['prob'],0.985826563481)
+    self.assertAlmostEqual(test[1]['svm_score'],0.698591590494)
+
+    self.assertEqual(test[2]['seq'], 'VEVNEK')
+    self.assertAlmostEqual(test[2]['prob'],0.698591590494)
+    self.assertAlmostEqual(test[2]['svm_score'],0.310199536208)
+
+###############################
 
 
 if __name__ == '__main__':
