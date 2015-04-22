@@ -6,77 +6,90 @@ import re
 AA = re.compile('[ACDEFGHILMNPQSTVWY]+[RK]')
 AA_check = re.compile('[ACDEFGHILKMNPQRSTVWY]')
 
-# Check that all entries in sequence represent valid amino acids
 def check_AA(test_string):
+  """Check that all entries in sequence represent valid amino acids"""
   if len(AA_check.findall(test_string)) == len(test_string):
     return True
   else:
     raise Exception("Invalid amino acid in seq: " + test_string)
 
-# Check that all proteins in list contain only valid amino acids
-# input: 
-#        proteins: list of protein sequences as strings ['protein_seq', ...]
 def check_proteins(proteins):
+  """
+  Check that all proteins in list contain only valid amino acids
+  input: 
+       proteins: list of protein sequences as strings ['protein_seq', ...]
+  """
   for p in proteins:
     check_AA(p)
   return True
 
-# Creates list of peptides from protein sequence
-# input:
-#        protein_seq: string containing protein sequence of amino acids
-# output:
-#        list of strings containing peptide sequences from protein sequence ['peptide_seq', ...]
 def get_peptides(protein_seq):
+  """
+  Creates list of peptides from protein sequence
+  input:
+         protein_seq: string containing protein sequence of amino acids
+  output:
+         list of strings containing peptide sequences from protein sequence ['peptide_seq', ...]
+  """
   check_AA(protein_seq)
   return AA.findall(protein_seq)
 
-# Creates list of all peptides from protein set
-# inputs:
-#        proteins: list of protein sequences as strings ['protein_seq', ...]
-# output:
-#        list of strings containing peptide sequences from all protein sequences ['peptide_seq', ...] 
 def all_peptides(proteins):
+  """
+  Creates list of all peptides from protein set
+  inputs:
+          proteins: list of protein sequences as strings ['protein_seq', ...]
+  output:
+          list of strings containing peptide sequences from all protein sequences ['peptide_seq', ...] 
+  """
   return [p for peptides in [get_peptides(ps) for ps in proteins] for p in peptides]
 
-# Creates list of all distinct peptides from protein set
-# inputs:
-#        proteins: list of protein sequences as strings ['protein_seq', ...]
-# output:
-#        list of strings containing distinct peptide sequences from all protein sequences ['peptide_seq', ...] 
 def distinct_peptides(proteins):
+  """
+  Creates list of all distinct peptides from protein set
+  inputs:
+          proteins: list of protein sequences as strings ['protein_seq', ...]
+  output:
+          list of strings containing distinct peptide sequences from all protein sequences ['peptide_seq', ...] 
+  """
   return list(set(all_peptides(proteins)))
 
 
-# Creates list of unique identifiers for each protein from set
-# inputs:
-#        proteins: list of protein sequences as strings ['protein_seq', ...]
-# output:
-#        list of lists containing protein sequence and a unique identifying peptide sequence [['protein_seq', 'peptide_seq'], ...]       
 def unique_identifiers(proteins):
-    all_pep = [[ps[0], pep] for ps in enumerate(proteins) for pep in get_peptides(ps[1])]
-    dp = distinct_peptides(proteins)
-    ui = []
-    for idx,seq in enumerate(dp):
-      idx = [item[0] for item in all_pep if item[1] == seq]
-      if len(idx) == 1:
-        ui.append([proteins[idx[0]], seq])
-    return ui
+  """
+  Creates list of unique identifiers for each protein from set
+  inputs:
+          proteins: list of protein sequences as strings ['protein_seq', ...]
+  output:
+          list of lists containing protein sequence and a unique identifying peptide sequence [['protein_seq', 'peptide_seq'], ...]       """ 
+  all_pep = [[ps[0], pep] for ps in enumerate(proteins) for pep in get_peptides(ps[1])]
+  dp = distinct_peptides(proteins)
+  ui = []
+  for idx,seq in enumerate(dp):
+    idx = [item[0] for item in all_pep if item[1] == seq]
+    if len(idx) == 1:
+      ui.append([proteins[idx[0]], seq])
+  return ui
 
-# Creates list of unique identifier peptides grouped by protein
-# input: 
-#        ui: a set of unique identifiers such as that produced by unique_identifiers([proteins]) [['protein_seq', 'peptide_seq'],.....]
-# output: 
-#        list of unique identifier peptides grouped by their protein [['protein_seq', ['peptide_seq', 'peptide_seq', ...]],.....]
 def peptides_per_protein(ui):
+  """
+  Creates list of unique identifier peptides grouped by protein
+  input: 
+          ui: a set of unique identifiers such as that produced by unique_identifiers([proteins]) [['protein_seq', 'peptide_seq'],.....]
+  output: 
+          list of unique identifier peptides grouped by their protein [['protein_seq', ['peptide_seq', 'peptide_seq', ...]],.....]
+  """
   proteins = list(set([item[0] for item in ui]))
   return [[p, [item[1] for item in ui if item[0] == p]] for p in proteins]
 
-# Counts the minimum number of unique identifier peptides across all proteins in a set
-# input:
-#        proteins: list of protein sequences as strings ['protein_seq', ...]
-# output:
-#        minimum number of unique identifier peptides across all proteins in a set
 def min_ui_count(proteins):
+  """
+  Counts the minimum number of unique identifier peptides across all proteins in a set
+  input:
+         proteins: list of protein sequences as strings ['protein_seq', ...]
+  output:
+         minimum number of unique identifier peptides across all proteins in a set
+  """
   temp = []
   for p in peptides_per_protein(unique_identifiers(proteins)):
     temp.append(len(p[1]))
@@ -85,14 +98,16 @@ def min_ui_count(proteins):
   else:
     return min(temp)
 
-# Creates balanced sets of proteins based on unique peptides subject to contraints
-# inputs:
-#        proteins:     list of protein sequences as strings ['protein_seq', ...]
-#        max_set_size: maximum number of proteins permitted in a set
-#        unique:       minimum number of unique peptides required per protein
-# output:
-#        sets of protein sequences that meet the set size and uniqueness requirements [['protein_seq', ...], ...]
 def balanced_sets(proteins, max_set_size = 10, unique = 1):
+  """
+  Creates balanced sets of proteins based on unique peptides subject to contraints
+  inputs:
+          proteins:     list of protein sequences as strings ['protein_seq', ...]
+          max_set_size: maximum number of proteins permitted in a set
+          unique:       minimum number of unique peptides required per protein
+  output:
+          sets of protein sequences that meet the set size and uniqueness requirements [['protein_seq', ...], ...]
+  """
   check_proteins(proteins)
   sets = []
   for p in proteins:
@@ -141,13 +156,14 @@ grantham_polarity = {'A':  8.100,'C':  5.500,'D': 13.000,'E': 12.300,'F':  5.200
 zimmerman_polarity = {'A':  0.000,'C':  1.480,'D': 49.700,'E': 49.900,'F':  0.350,'G':  0.000,'H': 51.600,'I':  0.130,'K': 49.500,'L':  0.130,'M':  1.430,'N':  3.380,'P':  1.580,'Q':  3.530,'R': 52.000,'S':  1.670,'T':  1.660,'V':  0.130,'W':  2.100,'Y':  1.610 }          
 zimmerman_bulkiness = {'A': 11.500,'C': 13.460,'D': 11.680,'E': 13.570,'F': 19.800,'G':  3.400,'H': 13.690,'I': 21.400,'K': 15.710,'L': 21.400,'M': 16.250,'N': 12.820,'P': 17.430,'Q': 14.450,'R': 14.280,'V': 21.570,'S':  9.470,'T': 15.770,'W': 21.670,'Y': 18.030 }
 
-# Creates feature vector containing properties used in SVM model
-# inputs:
-#        seq:   string containing amino acid sequence  
-# output:
-#        numpy.array feature vector containing 35 properties of amino acid sequence 
 def calc_props(seq = ''):
   """
+  Creates feature vector containing properties used in SVM model
+  inputs:
+          seq:   string containing amino acid sequence  
+  output:
+          numpy.array feature vector containing 35 properties of amino acid sequence 
+  
   FEATURE VECTOR
   1   Length
   2   Molecular weight
@@ -166,7 +182,6 @@ def calc_props(seq = ''):
   15  Bulkiness (Zimmerman et al., 1968)
   16-35   Amino acid singlet counts in order: ACDEFGHIKLMNPQRSTVWY
   """
-
   if seq:
     props = [ float(len(seq)),
             mass_from_sequence(seq),
@@ -188,12 +203,14 @@ def calc_props(seq = ''):
   else:
     return np.array([])
 
-# Calculates SVM score of a feature vector 
-# inputs:
-#        fv = numpy.array feature vector containing 35 properties of amino acid sequence 
-# output:
-#        SVM score 
 def calc_SVM_score(fv = np.array([])):
+  """
+  Calculates SVM score of a feature vector 
+  inputs:
+          fv = numpy.array feature vector containing 35 properties of amino acid sequence 
+  output:
+          SVM score 
+  """
   if len(fv) == NUM_FEATURES:
     with open("resources/STEPP/STEPP_SupportVectors.txt") as tsv:
       sv_idx = 0
@@ -217,12 +234,14 @@ def calc_SVM_score(fv = np.array([])):
   else:
     return None
   
-# Calculates ionization probability based on SVM score 
-# inputs:
-#        score = SVM score output of calc_svm_score()
-# output:
-#        ionization probability
 def calc_ionization_prob(score = 0):
+  """
+  Calculates ionization probability based on SVM score 
+  inputs:
+          score = SVM score output of calc_svm_score()
+  output:
+          ionization probability
+  """
   zeta_pos = -0.3821 # K_pos
   sigma_pos = 0.3831 # scale_pos 
   mu_pos = 0.0739 # location_pos
@@ -231,20 +250,20 @@ def calc_ionization_prob(score = 0):
   sigma_neg = 0.3860 # scale_neg
   mu_neg  = -0.4283 # location_neg
 
-  def GEVCDF(x, mu, sigma, zeta):
+  def gevcdf(x, mu, sigma, zeta):
     z = (x-mu)/sigma
     t = np.real((1 + z * zeta + 0j) ** (-1/zeta))
     return np.exp(-t)
   
   def positive_probability(x, mu, sigma, zeta):
-    val = GEVCDF(x, mu, sigma, zeta)
+    val = gevcdf(x, mu, sigma, zeta)
     if np.isnan(val) or np.isinf(val):
       return 1
     else:
       return val
       
   def negative_probability(x, mu, sigma, zeta):
-    val = GEVCDF(x, mu, sigma, zeta)
+    val = gevcdf(x, mu, sigma, zeta)
     if np.isnan(val) or np.isinf(val):
       return 1
     else:
@@ -259,13 +278,14 @@ def calc_ionization_prob(score = 0):
 
   return prob if prob > 0 else 0
 
-# Calculates ionization probability and SVM score for all peptides in a set
-# inputs:
-#        peptides = array of peptide sequence strings ['SAMPLE', 'SAMPLE',...]
-# output:
-#        array of dictionaries [{'seq': string, 'prob': float, 'svm_score': float}, ...] 
 def calc_ionization_probs(peptides = []):
-  
+  """ 
+  Calculates ionization probability and SVM score for all peptides in a set
+  inputs:
+          peptides = array of peptide sequence strings ['SAMPLE', 'SAMPLE',...]
+  output:
+          array of dictionaries [{'seq': string, 'prob': float, 'svm_score': float}, ...] 
+  """
   # Normalize vector based on baseline mean and stdev
   norm_props = [np.divide(calc_props(p) - STEPP_mean, STEPP_std) for p in peptides]
   out = []
