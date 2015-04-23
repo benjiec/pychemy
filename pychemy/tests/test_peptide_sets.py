@@ -196,10 +196,12 @@ class Peptide_Set_Testing(unittest.TestCase):
 
 ###############################
 
-  def test_calc_props_with_empty_sequence(self):
-    self.assertTrue(np.array_equal(calc_props(''), np.array([])))
+  def test_SVM_props_with_empty_sequence(self):
+    f = peptide_flyability()
+    self.assertTrue(np.array_equal(f.SVM_props(''), np.array([])))
 
-  def test_calc_props_with_nonempty_sequence(self):
+  def test_SVM_props_with_nonempty_sequence(self):
+    f = peptide_flyability()
     correct = np.array(
     [ 1.30000000e+01,   1.42764901e+03,   7.00000000e+00,   6.00000000e+00,
       2.00000000e+00,   4.00000000e+00,   0.00000000e+00,   4.00000000e+00,
@@ -210,35 +212,40 @@ class Peptide_Set_Testing(unittest.TestCase):
       1.00000000e+00,   1.00000000e+00,   0.00000000e+00,   3.00000000e+00,
       0.00000000e+00,   0.00000000e+00,   1.00000000e+00,   1.00000000e+00,
       0.00000000e+00,   0.00000000e+00,   0.00000000e+00])
-    test = calc_props('SAMPLEPEPTIDE')
+    test = f.SVM_props('SAMPLEPEPTIDE')
 
     for idx, item in enumerate(correct):
       self.assertAlmostEqual(test[idx], item, places=3)
 
 ###############################
 
-  def test_calc_SVM_score_without_complete_feature_vector(self):
-    self.assertIsNone(calc_SVM_score([]))
-    self.assertIsNone(calc_SVM_score([1]))
-    self.assertIsNone(calc_SVM_score([1,2,3]))
+  def test_SVM_score_without_complete_feature_vector(self):
+    f = peptide_flyability()
+    self.assertIsNone(f.SVM_score([]))
+    self.assertIsNone(f.SVM_score([1]))
+    self.assertIsNone(f.SVM_score([1,2,3]))
 
-  def test_calc_SVM_score_with_complete_feature_vector(self):
-    test = calc_SVM_score(np.divide(calc_props('SAMPLEPEPTIDE') - STEPP_mean, STEPP_std))
+  def test_SVM_score_with_complete_feature_vector(self):
+    f = peptide_flyability()
+    test = f.SVM_score(np.divide(f.SVM_props('SAMPLEPEPTIDE') - f.STEPP_mean, f.STEPP_std))
     self.assertAlmostEqual(test, 1.6285437521)
 
 ###############################
 
-  def test_calc_ionization_prob(self):
-    self.assertAlmostEqual(calc_ionization_prob(0.209218277881), 0.798247804562)
-    self.assertAlmostEqual(calc_ionization_prob(1.6285437521), 1.00000003356)
+  def test_ionization_prob(self):
+    f = peptide_flyability()
+    self.assertAlmostEqual(f.ionization_prob(0.209218277881), 0.798247804562)
+    self.assertAlmostEqual(f.ionization_prob(1.6285437521), 1.00000003356)
 
 ###############################
 
   def test_calc_ionization_probs_with_empty_list(self):
-    self.assertEqual([], calc_ionization_probs([]))
+    f = peptide_flyability()
+    self.assertEqual([], f.ionization_probs([]))
 
   def test_calc_ionization_probs_with_non_empty_list(self):
-    test = calc_ionization_probs(['MASQASEK', 'DISLVQTPHK', 'VEVNEK'])
+    f = peptide_flyability()
+    test = f.ionization_probs(['MASQASEK', 'DISLVQTPHK', 'VEVNEK'])
 
     self.assertEqual(len(test), 3)
     self.assertEqual(test[0]['seq'], 'MASQASEK')
