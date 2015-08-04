@@ -3,18 +3,35 @@ from pychemy.molmass import Formula
 import re
 
 
-# Parse string containing sequence into residues
-def residues_from_sequence(sequence = ''):
-  residues = re.findall('[A-Z](?:\([^\)]+\))?', sequence)
-
-  for item in residues:
-    sequence = re.sub(re.sub('\)', '\\\)', re.sub('\(', '\\\(', item)), '', sequence)
-
-  if len(sequence) > 0:
-    raise Exception('Sequence string contains improperly formatted residue: ' + str(sequence))
+# Retreives first amino acid from peptide sequence based on those available in AMINO_ACIDS
+def get_next_aa(sequence):
+  keep = []
+  for key in AMINO_ACIDS:
+    if sequence.startswith(key.mod):
+      keep.append(key)
+  
+  if len(keep) == 1:
+    return keep[0]
+  elif len(keep) == 0:
+    raise Exception('No matching residue in amino acid set')
   else:
-    return residues
+    mod_set = [k for k in keep if k.mod != k.residue]
+    if len(mod_set) == 1:
+      return mod_set[0]
+    else:
+      raise Exception('Conflicting modifications in amino acid set')
 
+# Parse string containing sequence into residues
+def residues_from_sequence(sequence):
+  count = 0
+  max_iter = len(sequence)
+  residues = []
+  while len(sequence) > 0 and count < max_iter + 2:
+    count += 1
+    aa = get_next_aa(sequence)
+    residues.append(aa.mod)
+    sequence = sequence.replace(aa.mod, '', 1)
+  return residues
 
 # Calculate mass of peptide based on chemical formula entered as 'ACDE'
 def mass_from_sequence(sequence = '', nterm = 'N-term', cterm = 'C-term'):
