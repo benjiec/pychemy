@@ -4,7 +4,7 @@ import re
 
 
 # Retreives first amino acid from peptide sequence based on those available in AMINO_ACIDS
-def get_next_AA(sequence):
+def get_next_aa(sequence):
   keep = []
   for key in AMINO_ACIDS:
     if sequence.startswith(key.mod):
@@ -16,6 +16,7 @@ def get_next_AA(sequence):
     raise Exception('No matching residue in amino acid set')
   else:
     mod_set = [k for k in keep if k.mod != k.residue]
+    print len(mod_set)
     if len(mod_set) == 1:
       return mod_set[0]
     else:
@@ -26,11 +27,11 @@ def residues_from_sequence(sequence):
   count = 0
   max_iter = len(sequence)
   residues = []
-  while len(sequence) > 0 and count < max_iter:
+  while len(sequence) > 0 and count < max_iter + 2:
     count += 1
-    AA = get_next_AA(sequence)
-    residues.append(AA.mod)
-    sequence = sequence.replace(AA.mod, '', 1)
+    aa = get_next_aa(sequence)
+    residues.append(aa.mod)
+    sequence = sequence.replace(aa.mod, '', 1)
   return residues
 
 # Calculate mass of peptide based on chemical formula entered as 'ACDE'
