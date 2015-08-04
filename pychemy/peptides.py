@@ -16,7 +16,6 @@ def get_next_aa(sequence):
     raise Exception('No matching residue in amino acid set')
   else:
     mod_set = [k for k in keep if k.mod != k.residue]
-    print len(mod_set)
     if len(mod_set) == 1:
       return mod_set[0]
     else:
