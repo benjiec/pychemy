@@ -6,6 +6,7 @@ import re
 from pychemy.peptides import mass_from_sequence
 import numpy as np
 import csv
+import os
 
 AA = re.compile('[ACDEFGHILMNPQSTVWY]+[RK]')
 AA_check = re.compile('[ACDEFGHILKMNPQRSTVWY]')
@@ -159,16 +160,16 @@ class peptide_flyability():
 
     self.AA_ORDER = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
                      'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
-
-    with open("resources/STEPP/STEPP_NormFactor_mean.txt") as tsv:
+    dir = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(dir, "resources/STEPP/STEPP_NormFactor_mean.txt")) as tsv:
       self.STEPP_mean = np.array([float(line[0])
                                  for line in csv.reader(tsv, delimiter="\t")])
 
-    with open("resources/STEPP/STEPP_NormFactor_std.txt") as tsv:
+    with open(os.path.join(dir, "resources/STEPP/STEPP_NormFactor_std.txt")) as tsv:
       self.STEPP_std = np.array([float(line[0])
                                 for line in csv.reader(tsv, delimiter="\t")])
 
-    with open("resources/STEPP/STEPP_Weights.txt") as tsv:
+    with open(os.path.join(dir, "resources/STEPP/STEPP_Weights.txt")) as tsv:
       self.STEPP_weights = np.array([float(line[0])
                                     for line in csv.reader(tsv,
                                                            delimiter="\t")])
@@ -310,7 +311,8 @@ class peptide_flyability():
             SVM score
     """
     if len(fv) == self.NUM_FEATURES:
-      with open("resources/STEPP/STEPP_SupportVectors.txt") as tsv:
+      dir = os.path.dirname(os.path.abspath(__file__))
+      with open(os.path.join(dir, "resources/STEPP/STEPP_SupportVectors.txt")) as tsv:
         sv_idx = 0
         svm_score = 0
         for line in csv.reader(tsv, delimiter="\t"):
