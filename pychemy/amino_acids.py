@@ -123,6 +123,10 @@ Amino_Acid(residue = 'V', mod = 'V', formula = 'C5H9N1O1')
 Amino_Acid(residue = 'N-term', mod = 'N-term', formula = '')
 Amino_Acid(residue = 'C-term', mod = 'C-term', formula = 'OH2')
 
+# Multiplex labeling reagents
+Amino_Acid(residue = 'N-term', mod = 'TMT10plex', formula = 'C8[13C]4H20N[15N]O2')
+Amino_Acid(residue = 'K', mod = 'K(TMT10plex)', formula = 'C14H33N3O3[13C]4[15N]')
+
 # mod format for heavy-labeled peptide ordering
 Amino_Acid(residue = 'K', mod = '[K_C13N15]', formula = '[13C]6H12[15N]2O1')
 Amino_Acid(residue = 'R', mod = '[R_C13N15]', formula = '[13C]6H12[15N]4O1')
