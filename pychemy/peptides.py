@@ -33,6 +33,15 @@ def residues_from_sequence(sequence):
     sequence = sequence.replace(aa.mod, '', 1)
   return residues
 
+# Check that a provided sequence is valid
+def verify_sequence(sequence):
+  assert (type(sequence) is not str), 'Sequence must be an array of amino acids, which can be produced from residues_from_sequence'
+
+  for r in sequence:
+    assert (r in [key.mod for key in AMINO_ACIDS]), 'Sequence must contain valid amino acids as defined in AMINO_ACIDS'
+
+  return True
+
 # Calculate mass of peptide based on chemical formula entered as 'ACDE'
 def mass_from_sequence(sequence = '', nterm = 'N-term', cterm = 'C-term'):
   seq_residues = residues_from_sequence(sequence)
@@ -105,6 +114,9 @@ def predict_negative_fragments_from_sequence(sequence = [], nterm = 'N-term', ct
 
 # Predict fragments from peptide sequence    
 def predict_fragments_from_sequence(sequence = [], nterm = 'N-term', cterm = 'C-term'):
+  
+  verify_sequence(sequence)
+
   out = []
 
   # b-ions
