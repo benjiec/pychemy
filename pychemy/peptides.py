@@ -43,7 +43,7 @@ def verify_sequence(sequence):
   return True
 
 # Calculate mass of peptide based on chemical formula entered as 'ACDE'
-def mass_from_sequence(sequence = '', nterm = 'N-term', cterm = 'C-term'):
+def mass_from_sequence(sequence='', nterm='N-term', cterm='C-term'):
   seq_residues = residues_from_sequence(sequence)
   mass = 0
 
@@ -68,7 +68,7 @@ def update_loss(loss, new_loss):
   return loss + [[1, LOSSES[new_loss]]]
 
 
-def loss_name(loss = []):
+def loss_name(loss=[]):
   out = ''
   for l in loss:
     if l[0] == 1:
@@ -78,11 +78,11 @@ def loss_name(loss = []):
   return out
 
 
-def predict_positive_fragments_from_sequence(sequence = [], nterm = 'N-term', cterm = 'C-term',
-                                             max_charge_state = 1):
+def predict_positive_fragments_from_sequence(sequence=[], nterm='N-term', cterm='C-term',
+                                             max_charge_state=1):
   out = []
 
-  fragments = predict_fragments_from_sequence(sequence = sequence, cterm = cterm)
+  fragments = predict_fragments_from_sequence(sequence=sequence, nterm=nterm, cterm=cterm)
 
   for item in fragments:
     out.append(( round(item[0] + Formula('H').isotope.mass, 5) , item[1] + ' (+1)'))
@@ -95,11 +95,11 @@ def predict_positive_fragments_from_sequence(sequence = [], nterm = 'N-term', ct
   return out
 
 
-def predict_negative_fragments_from_sequence(sequence = [], nterm = 'N-term', cterm = 'C-term',
-                                             max_charge_state = 1):
+def predict_negative_fragments_from_sequence(sequence=[], nterm='N-term', cterm='C-term',
+                                             max_charge_state=1):
   out = []
 
-  fragments = predict_fragments_from_sequence(sequence = sequence, cterm = cterm)
+  fragments = predict_fragments_from_sequence(sequence=sequence, nterm=nterm, cterm=cterm)
 
   for item in fragments:
     out.append(( round(item[0] - Formula('H').isotope.mass, 5), item[1] + ' (-1)'))
@@ -108,12 +108,12 @@ def predict_negative_fragments_from_sequence(sequence = [], nterm = 'N-term', ct
       if item[0] > 200 * cs:
         out.append(( round((item[0] - cs * Formula('H').isotope.mass) / cs, 5), item[1] + ' (-' +  str(cs) + ')'))
   
-  out = sorted(list(set(out)), key = lambda x:x[0])
+  out = sorted(list(set(out)), key=lambda x:x[0])
   return out
 
 
 # Predict fragments from peptide sequence    
-def predict_fragments_from_sequence(sequence = [], nterm = 'N-term', cterm = 'C-term'):
+def predict_fragments_from_sequence(sequence=[], nterm='N-term', cterm='C-term'):
   
   verify_sequence(sequence)
 
@@ -121,57 +121,57 @@ def predict_fragments_from_sequence(sequence = [], nterm = 'N-term', cterm = 'C-
 
   # b-ions
   nterm_mass = AMINO_ACIDS[nterm].mass
-  out += append_residue(mass = nterm_mass, 
-                        pos = 1, 
-                        ion_type = 'b_', 
-                        seq = sequence, 
-                        term = cterm, 
-                        loss = [])
+  out += append_residue(mass=nterm_mass, 
+                        pos=1, 
+                        ion_type='b_', 
+                        seq=sequence, 
+                        term=cterm, 
+                        loss=[])
   for l in AMINO_ACIDS[nterm].losses:
-    out += append_residue(mass = nterm_mass - l.mass, 
-                          pos = 1, 
-                          ion_type = 'b_', 
-                          seq = sequence, 
-                          term = cterm, 
-                          loss = update_loss([],l.formula))
+    out += append_residue(mass=nterm_mass - l.mass, 
+                          pos=1, 
+                          ion_type='b_', 
+                          seq=sequence, 
+                          term=cterm, 
+                          loss=update_loss([],l.formula))
 
   # a-ions
   nterm_mass = AMINO_ACIDS[nterm].mass - Formula('CO').isotope.mass 
-  out += append_residue(mass = nterm_mass, 
-                        pos = 1, 
-                        ion_type = 'a_', 
-                        seq = sequence, 
-                        term = cterm, 
-                        loss = [])
+  out += append_residue(mass=nterm_mass, 
+                        pos=1, 
+                        ion_type='a_', 
+                        seq=sequence, 
+                        term=cterm, 
+                        loss=[])
   for l in AMINO_ACIDS[nterm].losses:
-    out += append_residue(mass = nterm_mass - l.mass, 
-                          pos = 1, 
-                          ion_type = 'a_', 
-                          seq = sequence, 
-                          term = cterm, 
-                          loss = update_loss([],l.formula))
+    out += append_residue(mass=nterm_mass - l.mass, 
+                          pos=1, 
+                          ion_type='a_', 
+                          seq=sequence, 
+                          term=cterm, 
+                          loss=update_loss([],l.formula))
 
   # y-ions
   cterm_mass = AMINO_ACIDS[cterm].mass
-  out += append_residue(mass = cterm_mass, 
-                        pos = 1, 
-                        ion_type = 'y_', 
-                        seq = sequence[::-1], 
-                        term = nterm, 
-                        loss = [])
+  out += append_residue(mass=cterm_mass, 
+                        pos=1, 
+                        ion_type='y_', 
+                        seq=sequence[::-1], 
+                        term=nterm, 
+                        loss=[])
   for l in AMINO_ACIDS[cterm].losses:
-    out += append_residue(mass = cterm_mass - l.mass, 
-                          pos = 1, 
-                          ion_type = 'y_', 
-                          seq = sequence[::-1], 
-                          term = nterm, 
-                          loss = update_loss([],l.formula))
+    out += append_residue(mass=cterm_mass - l.mass, 
+                          pos=1, 
+                          ion_type='y_', 
+                          seq=sequence[::-1], 
+                          term=nterm, 
+                          loss=update_loss([],l.formula))
       
-  out = sorted(list(set(out)), key = lambda x:x[0])
+  out = sorted(list(set(out)), key=lambda x:x[0])
   return out
 
 
-def append_residue(mass, pos, ion_type = '', seq = [], term = '', loss = []):
+def append_residue(mass, pos, ion_type='', seq=[], term='', loss=[]):
   out = []
 
   if pos == 1 and not seq:
@@ -194,20 +194,20 @@ def append_residue(mass, pos, ion_type = '', seq = [], term = '', loss = []):
     r = AMINO_ACIDS[seq[0]]
 
     out += [(round(mass + r.mass, 5), ion_type + str(pos) + loss_name(loss))]          
-    out += append_residue(mass = mass + r.mass, 
-                          pos = pos + 1, 
-                          ion_type = ion_type, 
-                          seq = seq[1:], 
-                          term = term, 
-                          loss = loss)
+    out += append_residue(mass=mass + r.mass, 
+                          pos=pos + 1, 
+                          ion_type=ion_type, 
+                          seq=seq[1:], 
+                          term=term, 
+                          loss=loss)
     for l in r.losses:
       curr_loss = update_loss(loss, l.formula)
       out += [(round(mass + r.mass - l.mass, 5), ion_type + str(pos) + loss_name(curr_loss))]
-      out += append_residue(mass = mass + r.mass - l.mass, 
-                            pos = pos + 1, 
-                            ion_type = ion_type, 
-                            seq = seq[1:], 
-                            term = term, 
-                            loss = curr_loss)
+      out += append_residue(mass=mass + r.mass - l.mass, 
+                            pos=pos + 1, 
+                            ion_type=ion_type, 
+                            seq=seq[1:], 
+                            term=term, 
+                            loss=curr_loss)
 
   return out
