@@ -59,7 +59,7 @@ def mass_from_sequence(sequence='', nterm='N-term', cterm='C-term'):
 
   return mass
 
-def get_precursors(seq='', 
+def get_precursors(seq, 
                    min_mz=400, 
                    max_mz=2000, 
                    min_charge=1, 
@@ -68,7 +68,7 @@ def get_precursors(seq='',
   prec = [{
            'charge_state': c, 
            'mz': (m + c * Formula('H').mass) / c
-          } for c in range(min_charge, max_charge + 1)]
+          } for c in xrange(min_charge, max_charge + 1)]
   return filter(lambda x: min_mz <= x['mz'] <= max_mz, prec)
 
 def update_loss(loss, new_loss):
